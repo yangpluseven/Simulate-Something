@@ -1,8 +1,8 @@
-# vscode config file
-/.vscode/
+# vscode config file  (if exist)
+/simulation/.vscode/
 
-# eclipse
-/.settings/
+# eclipse (if exist)
+/simulation/.settings/
 
 # Compiled class file
 *.class
