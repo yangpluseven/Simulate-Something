@@ -1,3 +1,9 @@
+# vscode config file
+/.vscode/
+
+# eclipse
+/.settings/
+
 # Compiled class file
 *.class
 
