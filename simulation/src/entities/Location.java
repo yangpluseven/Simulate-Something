@@ -7,17 +7,14 @@ package entities;
  * 
  * @author pluseven
  */
-public class Location {
-
-	private int col;
-	private int row;
+public class Location extends Pair<Integer, Integer>{
 
 	/**
 	 * Default constructor.
 	 */
 	public Location() {
-		col = 0;
-		row = 0;
+		left = 0;
+		right = 0;
 	}
 
 	/**
@@ -27,40 +24,8 @@ public class Location {
 	 * @param col The column.
 	 */
 	public Location(int col, int row) {
-		this.col = col;
-		this.row = row;
-	}
-
-	/**
-	 * Implement content equality.
-	 */
-	public boolean equals(Object obj) {
-		if (obj instanceof Location) {
-			Location other = (Location) obj;
-			return row == other.getRow() && col == other.getCol();
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Return a string of the form row,column
-	 * 
-	 * @return A string representation of the location.
-	 */
-	public String toString() {
-		return col + ", " + row;
-	}
-
-	/**
-	 * Use the top 16 bits for the row value and the bottom for the column. Except
-	 * for very big grids, this should give a unique hash code for each (row, col)
-	 * pair.
-	 * 
-	 * @return A hash code for the location.
-	 */
-	public int hashCode() {
-		return (col << 16) + row;
+		left = col;
+		right = row;
 	}
 
 	/**
@@ -70,22 +35,27 @@ public class Location {
 	 * @param col
 	 */
 	public void update(int col, int row) {
-		this.col = col;
-		this.row = row;
+		left = col;
+		right = row;
 	}
 
 	/**
 	 * @return The column.
 	 */
 	public int getCol() {
-		return col;
+		return left;
 	}
 
 	/**
 	 * @return The row.
 	 */
 	public int getRow() {
-		return row;
+		return right;
+	}
+
+	@Override
+	public int compareTo(Pair<Integer, Integer> o) {
+		return this.left == o.left ? this.right - o.right : this.left - o.left;
 	}
 
 }
