@@ -1,38 +1,50 @@
 package simulator;
 
 import constants.Constants;
-import entities.View;
+import entities.Field;
+import entities.Location;
+import entities.SimuObject;
+import entities.Size;
+import interfaces.Painter;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 /**
  * Display the main window of the simulation.
  * 
  * @author pluseven
  */
-public class SimulatorView extends JFrame {
+public class Displayer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final int numCols = Constants.NUM_COLS;
-	private final int numRows = Constants.NUM_ROWS;
-	private int gridWidth = Constants.INIT_GRID_WIDTH;
-	private int gridHeight = Constants.INIT_GRID_HEIGHT;
-	private int totalWidth;
-	private int totalHeight;
-	private JPanel displayArea;
+	private final Size numCR = Constants.NUM_OF_COL_ROW;
+	private Size gridSize = Constants.INIT_GRID_SIZE;
+	private Size totalSize = new Size();
+	private DisplayArea displayArea;
+	private Field field;
 
 	/**
 	 * Create a simulator window.
 	 */
-	public SimulatorView() {
-		this.totalWidth = gridWidth * numCols;
-		this.totalHeight = gridHeight * numRows;
+	public Displayer() {
+		totalSize.update(numCR.getWidth() * gridSize.getWidth(), numCR.getHeight() * gridSize.getHeight());
 
 		setTitle("simulation");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -96,13 +108,12 @@ public class SimulatorView extends JFrame {
 
 		setLayout(new BorderLayout());
 
-		displayArea = new JPanel();
-		displayArea.setPreferredSize(new Dimension(totalWidth, totalHeight));
-		displayArea.setLayout(new BorderLayout());
+		displayArea = new DisplayArea();
 		add(displayArea, BorderLayout.CENTER);
 
 		// Add component listener for resize operate
 		addComponentListener(new ComponentAdapter() {
+
 			/**
 			 * Resize the display area and all the simulation objects' view when the window
 			 * is resized.
@@ -111,22 +122,22 @@ public class SimulatorView extends JFrame {
 			 */
 			@Override
 			public void componentResized(ComponentEvent e) {
-				double xScale = (double) getWidth() / totalWidth;
-				double yScale = (double) getHeight() / totalHeight;
+				double xScale = (double) getWidth() / totalSize.getWidth();
+				double yScale = (double) getHeight() / totalSize.getHeight();
 				double scale = Math.min(xScale, yScale);
-				int newHeight = totalHeight, newWidth = totalWidth;
-				int tmpTotalWidth = (int) (totalWidth * scale);
-				int tmpTotalHeight = (int) (totalHeight * scale);
+				int newHeight = totalSize.getHeight(), newWidth = totalSize.getWidth();
+				int tmpTotalWidth = (int) (totalSize.getWidth() * scale);
+				int tmpTotalHeight = (int) (totalSize.getHeight() * scale);
 				// Ensure that the view of the simulator object is still an integer after being
 				// resized.
 				for (int i = tmpTotalWidth; i >= 0; i--)
-					if (i % numCols == 0) {
+					if (i % numCR.getWidth() == 0) {
 						newWidth = i;
 						break;
 					}
 
 				for (int i = tmpTotalHeight; i >= 0; i--)
-					if (i % numRows == 0) {
+					if (i % numCR.getHeight() == 0) {
 						newHeight = i;
 						break;
 					}
@@ -135,15 +146,11 @@ public class SimulatorView extends JFrame {
 				displayArea.setPreferredSize(new Dimension(newWidth, newHeight));
 
 				// Resize all the simulation objects' view.
-				int newGridWidth = newWidth / numCols;
-				int newGridHeight = newHeight / numRows;
-				Component[] components = displayArea.getComponents();
-				for (Component component : components) {
-					if (component instanceof View) {
-						View view = (View) component;
-						view.updateSize(newGridWidth, newGridHeight);
-					}
-				}
+				totalSize.update(newWidth, newHeight);
+				int newGridWidth = newWidth / numCR.getWidth();
+				int newGridHeight = newHeight / numCR.getHeight();
+				gridSize.update(newGridWidth, newGridHeight);
+				displayArea.repaint();
 			}
 		});
 
@@ -183,33 +190,38 @@ public class SimulatorView extends JFrame {
 		setVisible(true);
 	}
 
-	
-	/**
-	 * Add a simulation objects' view.
-	 * 
-	 * @param view
-	 */
-	public void addView(View view) {
-		displayArea.add(view);
-		revalidate();
-		repaint();
+	private class DisplayArea extends JPanel {
+
+		private static final long serialVersionUID = 1L;
+		
+		private Image image;
+		private Graphics graphic;
+
+		private DisplayArea() {
+			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
+		}
+
+		public Dimension getPreferredSize() {
+			return new Dimension(totalSize.getWidth(), totalSize.getHeight());
+		}
+
+		public void refresh() {
+			image = createImage(totalSize.getWidth(), totalSize.getHeight());
+			graphic = image.getGraphics();
+		}
+
+		public void drawObject(SimuObject simuObj) {
+			Painter painter = simuObj.getPainter();
+			Location location = simuObj.getLocation();
+			int x = location.getCol() * gridSize.getWidth();
+			int y = location.getRow() * gridSize.getHeight();
+			graphic.setColor(simuObj.getColor());
+			painter.paint(graphic, x, y, gridSize.getWidth(), gridSize.getHeight());
+		}
+
+		public void paintComponent(Graphics g) {
+			g.drawImage(image, 0, 0, null);
+		}
 	}
 
-	/**
-	 * Getter for girdWidth.
-	 * 
-	 * @return gridWidth
-	 */
-	public int getGridWidth() {
-		return gridWidth;
-	}
-
-	/**
-	 * Getter for gridHeight
-	 * 
-	 * @return gridHeight
-	 */
-	public int getGridHeight() {
-		return gridHeight;
-	}
 }
