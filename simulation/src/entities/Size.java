@@ -1,21 +1,59 @@
 package entities;
 
-// TODO Size doc
+/**
+ * Records the size of something, usually a rectangle.
+ * 
+ * @author pluseven
+ */
 public class Size extends Pair<Integer, Integer> {
 
+	/**
+	 * Default constructor.
+	 */
 	public Size() {
-		// TODO Auto-generated constructor stub
+		left = 0;
+		right = 0;
 	}
 
-	public Size(Integer left, Integer right) {
-		super(left, right);
-		// TODO Auto-generated constructor stub
+	/**
+	 * Represent a width and height.
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	public Size(int width, int height) {
+		left = width;
+		right = height;
 	}
 
+	/**
+	 * Update the size.
+	 * 
+	 * @param width
+	 * @param height
+	 */
+	public void update(int width, int height) {
+		left = width;
+		right = height;
+	}
+	
+	/**
+	 * @return width
+	 */
+	public int getWidth() {
+		return left;
+	}
+	
+	/**
+	 * @return height
+	 */
+	public int getHeight() {
+		return right;
+	}
+	
 	@Override
 	public int compareTo(Pair<Integer, Integer> o) {
-		// TODO Auto-generated method stub
-		return 0;
+		return this.left == o.left ? this.right - o.right : this.left - o.left;
 	}
 
 }

@@ -1,7 +1,7 @@
 package entities;
 
 /**
- * Location records the location of a SimuObject on a grid map. It is different
+ * Records the location of a SimuObject on a grid map. It is different
  * from the x and y used in the GUI, and requires some calculations to convert
  * it into x and y.
  * 
