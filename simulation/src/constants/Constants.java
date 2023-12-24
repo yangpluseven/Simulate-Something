@@ -17,6 +17,6 @@ public class Constants {
 	public static final int BACKGROUND_Z_ORDER = 0;
 	public static final int TERRAIN_BOTTOM_Z_ORDER = 1;
 	public static final int CREATURE_BOTTOM_Z_ORDER = 6;
-	public static final Size INIT_GRID_SIZE = new Size(5, 5);
+	
 
 }
