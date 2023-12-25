@@ -21,8 +21,8 @@ public class GUITest {
 		SwingUtilities.invokeLater(() -> {
 			F f = new F();
 			f.p.prepare();
-			f.p.draw(0, 0, Color.BLUE);
-			f.p.draw(10, 10, Color.BLACK);
+			f.p.drawRec(0, 0, Color.BLUE);
+			f.p.drawCir(0, 0, Color.BLACK);
 		});
 	}
 
@@ -49,21 +49,26 @@ class P extends JPanel {
 	public Graphics g;
 
 	public P() {
-		setPreferredSize(new Dimension(100, 60));
+		setPreferredSize(new Dimension(200, 150));
 	}
 	
 	public Dimension getPreferredSize() {
-		return new Dimension(100, 60);
+		return new Dimension(200, 150);
 	}
 	
 	public void prepare() {
-		i = createImage(100, 60);
+		i = createImage(200, 150);
 		g = i.getGraphics();
 	}
 	
-	public void draw(int x, int y, Color color) {
+	public void drawRec(int x, int y, Color color) {
 		g.setColor(color);
-		g.fillRect(x, y, 10, 10);
+		g.fillRect(x, y, 30, 30);
+	}
+	
+	public void drawCir(int x, int y, Color color) {
+		g.setColor(color);
+		g.fillOval(x, y, 30, 30);
 	}
 
 	public void paintComponent(Graphics g) {

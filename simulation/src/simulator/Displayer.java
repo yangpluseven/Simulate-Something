@@ -1,7 +1,6 @@
 package simulator;
 
 import constants.Constants;
-import entities.Field;
 import entities.Location;
 import entities.SimuObject;
 import entities.Size;
@@ -38,7 +37,7 @@ public class Displayer extends JFrame {
 	private Size gridSize = Constants.INIT_GRID_SIZE;
 	private Size totalSize = new Size();
 	private DisplayArea displayArea;
-	private Field field;
+	private GridMap gridMap;
 
 	/**
 	 * Create a simulator window.
