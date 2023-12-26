@@ -55,7 +55,10 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 	 * @param location
 	 */
 	public void addObjectAt(SimuObject simuObj, Location location) {
+		if (grids[location.getCol()][location.getRow()] == null)
+			grids[location.getCol()][location.getRow()] = new Grid();
 		grids[location.getCol()][location.getRow()].add(simuObj);
+		numOfObjs++;
 	}
 
 	/**
@@ -66,6 +69,20 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 	 */
 	public Iterator<SimuObject> getIteratorAt(Location location) {
 		return grids[location.getCol()][location.getRow()].iterator();
+	}
+	
+	/**
+	 * Return iterators of those grids.
+	 * 
+	 * @return all the iterators
+	 */
+	public Collection<Iterator<SimuObject>> getAllIterator() {
+		ArrayList<Iterator<SimuObject>> iterators = new ArrayList<Iterator<SimuObject>>(size());
+		for (int i = 0; i < numCR.getWidth(); i++)
+			for (int j = 0; j < numCR.getHeight(); j++)
+				if (grids[i][j] != null)
+					iterators.add(grids[i][j].iterator());
+		return iterators;
 	}
 
 	/**
@@ -118,6 +135,7 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 
 	@Override
 	public Grid put(Location key, Grid value) {
+		numOfObjs += value.size();
 		return grids[key.getCol()][key.getRow()] = value;
 	}
 
@@ -128,6 +146,7 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 		Location location = (Location) key;
 		Grid grid = grids[location.getCol()][location.getRow()];
 		grids[location.getCol()][location.getRow()] = null;
+		numOfObjs -= grid.size();
 		return grid;
 	}
 
@@ -135,6 +154,7 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 	public void putAll(Map<? extends Location, ? extends Grid> m) {
 		for (Entry<? extends Location, ? extends Grid> entry : m.entrySet()) {
 			put(entry.getKey(), entry.getValue());
+			numOfObjs += entry.getValue().size();
 		}
 	}
 
@@ -143,6 +163,7 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 		for (int i = 0; i < numCR.getWidth(); i++)
 			for (int j = 0; j < numCR.getHeight(); j++)
 				grids[i][j] = null;
+		numOfObjs = 0;
 	}
 
 	@Override
@@ -157,7 +178,7 @@ public class GridMap implements Map<Location, simulator.GridMap.Grid> {
 
 	@Override
 	public Collection<Grid> values() {
-		Collection<Grid> collection = new ArrayList<Grid>(numCR.getWidth() * numCR.getHeight());
+		Collection<Grid> collection = new ArrayList<Grid>(size());
 		for (int i = 0; i < numCR.getWidth(); i++)
 			for (int j = 0; j < numCR.getHeight(); j++)
 				if (grids[i][j] != null)

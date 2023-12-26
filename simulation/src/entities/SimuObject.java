@@ -11,14 +11,14 @@ public abstract class SimuObject {
 	protected Location location;
 	protected Painter painter;
 	protected Color color;
-
-	public Color getColor() {
-		return color;
-	}
-
+	
 	public SimuObject() {
 		location = new Location();
 		painter = new Rectangle();
+	}
+
+	public Color getColor() {
+		return color;
 	}
 
 	public Painter getPainter() {

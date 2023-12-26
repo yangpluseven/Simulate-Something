@@ -1,6 +1,6 @@
 package test;
 
-public class GridMapTest {
+public class GMTest {
 
 	public static void main(String[] args) {
 		GM gm = new GM();

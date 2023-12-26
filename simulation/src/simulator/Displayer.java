@@ -15,6 +15,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.util.Iterator;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -37,7 +38,6 @@ public class Displayer extends JFrame {
 	private Size gridSize = Constants.INIT_GRID_SIZE;
 	private Size totalSize = new Size();
 	private DisplayArea displayArea;
-	private GridMap gridMap;
 
 	/**
 	 * Create a simulator window.
@@ -102,6 +102,8 @@ public class Displayer extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pack();
+				displayArea.repaint();
+				repaint();
 			}
 		});
 
@@ -186,7 +188,13 @@ public class Displayer extends JFrame {
 	 * Display the window.
 	 */
 	public void display() {
+		displayArea.refresh();
+		displayArea.drawAll();
 		setVisible(true);
+	}
+	
+	public void addObjectAt(SimuObject simuObj, Location location) {
+		displayArea.gridMap.addObjectAt(simuObj, location);
 	}
 
 	private class DisplayArea extends JPanel {
@@ -195,8 +203,15 @@ public class Displayer extends JFrame {
 		
 		private Image image;
 		private Graphics graphic;
+		private GridMap gridMap;
 
 		private DisplayArea() {
+			gridMap = new GridMap();
+			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
+		}
+		
+		private DisplayArea(GridMap gridMap) {
+			this.gridMap = gridMap;
 			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
 		}
 
@@ -216,6 +231,15 @@ public class Displayer extends JFrame {
 			int y = location.getRow() * gridSize.getHeight();
 			graphic.setColor(simuObj.getColor());
 			painter.paint(graphic, x, y, gridSize.getWidth(), gridSize.getHeight());
+		}
+		
+		public void drawAll() {
+			for (Iterator<SimuObject> iter : gridMap.getAllIterator()) {
+				while (iter.hasNext()) {
+					SimuObject simuObj = iter.next();
+					drawObject(simuObj);
+				}
+			}
 		}
 
 		public void paintComponent(Graphics g) {
