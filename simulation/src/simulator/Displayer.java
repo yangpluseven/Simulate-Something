@@ -34,16 +34,12 @@ public class Displayer extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Size numCR = Constants.NUM_OF_COL_ROW;
-	private Size gridSize = Constants.INIT_GRID_SIZE;
-	private Size totalSize = new Size();
 	private DisplayArea displayArea;
 
 	/**
 	 * Create a simulator window.
 	 */
 	public Displayer() {
-		totalSize.update(numCR.getWidth() * gridSize.getWidth(), numCR.getHeight() * gridSize.getHeight());
 
 		setTitle("simulation");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -102,8 +98,9 @@ public class Displayer extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				pack();
+				displayArea.refresh();
+				displayArea.drawAll();
 				displayArea.repaint();
-				repaint();
 			}
 		});
 
@@ -111,49 +108,6 @@ public class Displayer extends JFrame {
 
 		displayArea = new DisplayArea();
 		add(displayArea, BorderLayout.CENTER);
-
-		// Add component listener for resize operate
-		addComponentListener(new ComponentAdapter() {
-
-			/**
-			 * Resize the display area and all the simulation objects' view when the window
-			 * is resized.
-			 * 
-			 * @param e component event.
-			 */
-			@Override
-			public void componentResized(ComponentEvent e) {
-				double xScale = (double) getWidth() / totalSize.getWidth();
-				double yScale = (double) getHeight() / totalSize.getHeight();
-				double scale = Math.min(xScale, yScale);
-				int newHeight = totalSize.getHeight(), newWidth = totalSize.getWidth();
-				int tmpTotalWidth = (int) (totalSize.getWidth() * scale);
-				int tmpTotalHeight = (int) (totalSize.getHeight() * scale);
-				// Ensure that the view of the simulator object is still an integer after being
-				// resized.
-				for (int i = tmpTotalWidth; i >= 0; i--)
-					if (i % numCR.getWidth() == 0) {
-						newWidth = i;
-						break;
-					}
-
-				for (int i = tmpTotalHeight; i >= 0; i--)
-					if (i % numCR.getHeight() == 0) {
-						newHeight = i;
-						break;
-					}
-
-				// Resize the display area.
-				displayArea.setPreferredSize(new Dimension(newWidth, newHeight));
-
-				// Resize all the simulation objects' view.
-				totalSize.update(newWidth, newHeight);
-				int newGridWidth = newWidth / numCR.getWidth();
-				int newGridHeight = newHeight / numCR.getHeight();
-				gridSize.update(newGridWidth, newGridHeight);
-				displayArea.repaint();
-			}
-		});
 
 		// Add a panel for the bottom area
 		JPanel bottomPanel = new JPanel();
@@ -192,7 +146,7 @@ public class Displayer extends JFrame {
 		displayArea.drawAll();
 		setVisible(true);
 	}
-	
+
 	public void addObjectAt(SimuObject simuObj, Location location) {
 		displayArea.gridMap.addObjectAt(simuObj, location);
 	}
@@ -200,31 +154,73 @@ public class Displayer extends JFrame {
 	private class DisplayArea extends JPanel {
 
 		private static final long serialVersionUID = 1L;
-		
+
+		private final Size numCR = Constants.NUM_OF_COL_ROW;
+		private Size gridSize = Constants.INIT_GRID_SIZE;
+		private Size totalSize = new Size();
 		private Image image;
 		private Graphics graphic;
 		private GridMap gridMap;
 
 		private DisplayArea() {
-			gridMap = new GridMap();
-			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
+			this(new GridMap());
 		}
-		
+
 		private DisplayArea(GridMap gridMap) {
+			totalSize.update(numCR.getWidth() * gridSize.getWidth(), numCR.getHeight() * gridSize.getHeight());
 			this.gridMap = gridMap;
 			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
+
+			// Add component listener for resize operate
+			addComponentListener(new ComponentAdapter() {
+
+				/**
+				 * Resize the display area and all the simulation objects' view when the window
+				 * is resized.
+				 * 
+				 * @param e component event.
+				 */
+				@Override
+				public void componentResized(ComponentEvent e) {
+					double xScale = (double) getWidth() / totalSize.getWidth();
+					double yScale = (double) getHeight() / totalSize.getHeight();
+					double scale = Math.min(xScale, yScale);
+					int newHeight = totalSize.getHeight(), newWidth = totalSize.getWidth();
+					int tmpTotalWidth = (int) (totalSize.getWidth() * scale);
+					int tmpTotalHeight = (int) (totalSize.getHeight() * scale);
+					// Ensure that the view of the simulator object is still an integer after being
+					// resized.
+					for (int i = tmpTotalWidth; i >= 0; i--)
+						if (i % numCR.getWidth() == 0) {
+							newWidth = i;
+							break;
+						}
+
+					for (int i = tmpTotalHeight; i >= 0; i--)
+						if (i % numCR.getHeight() == 0) {
+							newHeight = i;
+							break;
+						}
+
+					// Resize the display area.
+					displayArea.setPreferredSize(new Dimension(newWidth, newHeight));
+
+					// Resize all the simulation objects' view.
+					totalSize.update(newWidth, newHeight);
+					int newGridWidth = newWidth / numCR.getWidth();
+					int newGridHeight = newHeight / numCR.getHeight();
+					gridSize.update(newGridWidth, newGridHeight);
+					displayArea.repaint();
+				}
+			});
 		}
 
-		public Dimension getPreferredSize() {
-			return new Dimension(totalSize.getWidth(), totalSize.getHeight());
-		}
-
-		public void refresh() {
+		private void refresh() {
 			image = createImage(totalSize.getWidth(), totalSize.getHeight());
 			graphic = image.getGraphics();
 		}
 
-		public void drawObject(SimuObject simuObj) {
+		private void drawObject(SimuObject simuObj) {
 			Painter painter = simuObj.getPainter();
 			Location location = simuObj.getLocation();
 			int x = location.getCol() * gridSize.getWidth();
@@ -232,14 +228,18 @@ public class Displayer extends JFrame {
 			graphic.setColor(simuObj.getColor());
 			painter.paint(graphic, x, y, gridSize.getWidth(), gridSize.getHeight());
 		}
-		
-		public void drawAll() {
+
+		private void drawAll() {
 			for (Iterator<SimuObject> iter : gridMap.getAllIterator()) {
 				while (iter.hasNext()) {
 					SimuObject simuObj = iter.next();
 					drawObject(simuObj);
 				}
 			}
+		}
+
+		public Dimension getPreferredSize() {
+			return new Dimension(totalSize.getWidth(), totalSize.getHeight());
 		}
 
 		public void paintComponent(Graphics g) {

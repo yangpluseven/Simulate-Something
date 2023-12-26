@@ -13,21 +13,13 @@ import interfaces.Painter;
 public class Rectangle implements Painter {
 
 	private double scale;
-	private Color color;
 
 	public Rectangle() {
 		scale = 1D;
-		color = Color.BLACK;
-	}
-
-	public Rectangle(double scale) {
-		this.scale = scale;
-		color = Color.BLACK;
 	}
 	
-	public Rectangle(double scale, Color color) {
+	public Rectangle(double scale) {
 		this.scale = scale;
-		this.color = color;
 	}
 
 	@Override
@@ -40,7 +32,6 @@ public class Rectangle implements Painter {
 		yReal = yCenter - (int) (scale * h / 2);
 		wReal = (int) (scale * w);
 		hReal = (int) (scale * h);
-		g.setColor(color);
 		g.fillRect(xReal, yReal, wReal, hReal);
 	}
 
