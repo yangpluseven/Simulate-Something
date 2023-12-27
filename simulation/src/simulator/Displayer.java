@@ -9,12 +9,15 @@ import interfaces.Painter;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import java.util.Iterator;
 
 import javax.swing.JFrame;
@@ -91,7 +94,13 @@ public class Displayer extends JFrame {
 
 		// Add Window menu items
 		JMenuItem packMenuItem = new JMenuItem("Pack");
+		JMenuItem zoomInMenuItem = new JMenuItem("Zoom In(+)");
+		JMenuItem zoomOutMenuItem = new JMenuItem("Zoom Out(-)");
+		JMenuItem fixMenuItem = new JMenuItem("Fix");
 		windowMenu.add(packMenuItem);
+		windowMenu.add(zoomInMenuItem);
+		windowMenu.add(zoomOutMenuItem);
+		windowMenu.add(fixMenuItem);
 
 		// Add Window menu item listeners
 		packMenuItem.addActionListener(new ActionListener() {
@@ -103,11 +112,39 @@ public class Displayer extends JFrame {
 				displayArea.repaint();
 			}
 		});
+		
+		zoomInMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				displayArea.zoom(Constants.ZOOM_IN);
+			}
+		});
+		
+		zoomOutMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				displayArea.zoom(Constants.ZOOM_OUT);
+			}
+		});
+		
+		fixMenuItem.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				displayArea.fix();
+			}
+		});
+		
+		addWindowStateListener(new WindowStateListener() {
+			@Override
+			public void windowStateChanged(WindowEvent e) {
+				displayArea.fix();
+			}
+		});
 
 		setLayout(new BorderLayout());
 
 		displayArea = new DisplayArea();
-		add(displayArea, BorderLayout.CENTER);
+		getContentPane().add(displayArea, BorderLayout.CENTER);
 
 		// Add a panel for the bottom area
 		JPanel bottomPanel = new JPanel();
@@ -128,6 +165,16 @@ public class Displayer extends JFrame {
 		pack();
 		setVisible(true);
 	}
+	
+	
+	/**
+	 * Return the gridMap of displayArea.
+	 * 
+	 * @return the grid map.
+	 */
+	public GridMap getGridMap() {
+		return displayArea.gridMap;
+	}
 
 	/**
 	 * Display the name of the menu item in a message dialog for testing.
@@ -144,6 +191,7 @@ public class Displayer extends JFrame {
 	public void display() {
 		displayArea.refresh();
 		displayArea.drawAll();
+		displayArea.repaint();
 		setVisible(true);
 	}
 
@@ -170,49 +218,47 @@ public class Displayer extends JFrame {
 			totalSize.update(numCR.getWidth() * gridSize.getWidth(), numCR.getHeight() * gridSize.getHeight());
 			this.gridMap = gridMap;
 			setPreferredSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
-
-			// Add component listener for resize operate
-			addComponentListener(new ComponentAdapter() {
-
-				/**
-				 * Resize the display area and all the simulation objects' view when the window
-				 * is resized.
-				 * 
-				 * @param e component event.
-				 */
-				@Override
-				public void componentResized(ComponentEvent e) {
-					double xScale = (double) getWidth() / totalSize.getWidth();
-					double yScale = (double) getHeight() / totalSize.getHeight();
-					double scale = Math.min(xScale, yScale);
-					int newHeight = totalSize.getHeight(), newWidth = totalSize.getWidth();
-					int tmpTotalWidth = (int) (totalSize.getWidth() * scale);
-					int tmpTotalHeight = (int) (totalSize.getHeight() * scale);
-					// Ensure that the view of the simulator object is still an integer after being
-					// resized.
-					for (int i = tmpTotalWidth; i >= 0; i--)
-						if (i % numCR.getWidth() == 0) {
-							newWidth = i;
-							break;
-						}
-
-					for (int i = tmpTotalHeight; i >= 0; i--)
-						if (i % numCR.getHeight() == 0) {
-							newHeight = i;
-							break;
-						}
-
-					// Resize the display area.
-					displayArea.setPreferredSize(new Dimension(newWidth, newHeight));
-
-					// Resize all the simulation objects' view.
-					totalSize.update(newWidth, newHeight);
-					int newGridWidth = newWidth / numCR.getWidth();
-					int newGridHeight = newHeight / numCR.getHeight();
-					gridSize.update(newGridWidth, newGridHeight);
-					displayArea.repaint();
+		}
+		
+		private void fix() {
+			double xScale = (double) getWidth() / totalSize.getWidth();
+			double yScale = (double) getHeight() / totalSize.getHeight();
+			double scale = Math.min(xScale, yScale);
+			int newHeight = totalSize.getHeight(), newWidth = totalSize.getWidth();
+			int tmpTotalWidth = (int) (totalSize.getWidth() * scale);
+			int tmpTotalHeight = (int) (totalSize.getHeight() * scale);
+			// Ensure that the view of the simulator object is still an integer after being
+			// resized.
+			for (int i = tmpTotalWidth; i >= 0; i--)
+				if (i % numCR.getWidth() == 0) {
+					newWidth = i;
+					break;
 				}
-			});
+
+			for (int i = tmpTotalHeight; i >= 0; i--)
+				if (i % numCR.getHeight() == 0) {
+					newHeight = i;
+					break;
+				}
+
+			// Resize the display area.
+			displayArea.setPreferredSize(new Dimension(newWidth, newHeight));
+
+			// Resize all the simulation objects' view.
+			totalSize.update(newWidth, newHeight);
+			int newGridWidth = newWidth / numCR.getWidth();
+			int newGridHeight = newHeight / numCR.getHeight();
+			gridSize.update(newGridWidth, newGridHeight);
+			display();
+		}
+		
+		private void zoom(boolean zoomIn) {
+			int newGridWidth = gridSize.getWidth() + (zoomIn ? 1 : -1);
+			int newGridHeight = gridSize.getHeight() + (zoomIn ? 1 : -1);
+			gridSize.update(newGridWidth, newGridHeight);
+			totalSize.update(newGridWidth * numCR.getWidth(), newGridHeight * numCR.getHeight());
+			setSize(new Dimension(totalSize.getWidth(), totalSize.getHeight()));
+			display();
 		}
 
 		private void refresh() {
