@@ -5,7 +5,7 @@ package entities;
  * 
  * @author pluseven
  */
-public class Size extends Pair<Integer, Integer> {
+public class Size extends Pair<Integer, Integer> implements Comparable<Pair<Integer, Integer>> {
 
 	/**
 	 * Default constructor.
@@ -36,21 +36,21 @@ public class Size extends Pair<Integer, Integer> {
 		left = width;
 		right = height;
 	}
-	
+
 	/**
 	 * @return width
 	 */
 	public int getWidth() {
 		return left;
 	}
-	
+
 	/**
 	 * @return height
 	 */
 	public int getHeight() {
 		return right;
 	}
-	
+
 	@Override
 	public int compareTo(Pair<Integer, Integer> o) {
 		return this.left == o.left ? this.right - o.right : this.left - o.left;

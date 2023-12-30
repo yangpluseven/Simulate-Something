@@ -3,7 +3,7 @@ package entities;
 import java.util.Map.Entry;
 
 // TODO Pair doc
-public abstract class Pair<L, R> implements Comparable<Pair<L, R>>, Entry<L, R> {
+public class Pair<L, R> implements Entry<L, R> {
 
 	protected L left;
 	protected R right;

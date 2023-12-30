@@ -1,13 +1,13 @@
 package entities;
 
 /**
- * Records the location of a SimuObject on a grid map. It is different
- * from the x and y used in the GUI, and requires some calculations to convert
- * it into x and y.
+ * Records the location of a SimuObject on a grid map. It is different from the
+ * x and y used in the GUI, and requires some calculations to convert it into x
+ * and y.
  * 
  * @author pluseven
  */
-public class Location extends Pair<Integer, Integer>{
+public class Location extends Pair<Integer, Integer> implements Comparable<Pair<Integer, Integer>> {
 
 	/**
 	 * Default constructor.
